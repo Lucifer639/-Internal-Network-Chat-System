@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<BorderPane xmlns="https://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.lucifer.pp.gui.controller.ClientPaneController"
+            prefHeight="600.0" prefWidth="300.0">
+
+    <top>
+<!--        <Label prefHeight="100" prefWidth="300" style="-fx-background-color: red" text="aaaaaaaaaaaa" />-->
+        <BorderPane prefWidth="300" prefHeight="100">
+            <left>
+                <BorderPane prefWidth="100" prefHeight="100">
+                    <center>
+                        <ImageView fitWidth="60" fitHeight="60" fx:id="avatar">
+                            <image>
+                                <Image url="/gui/img/user/default_user.png"/>
+                            </image>
+                        </ImageView>
+                    </center>
+                </BorderPane>
+            </left>
+            <right>
+                <BorderPane prefWidth="200" prefHeight="100">
+                    <center>
+                        <Label fx:id="name"/>
+                    </center>
+                </BorderPane>
+            </right>
+        </BorderPane>
+    </top>
+    <center>
+        <fx:include source="ClientTabPane.fxml"/>
+    </center>
+    <bottom>
+        <FlowPane prefHeight="100" prefWidth="300">
+            <Label fx:id="searchLabel" onMouseClicked="#openSearchWindow">
+                <graphic>
+                    <ImageView fitWidth="50" fitHeight="50">
+                        <Image url="/gui/img/common/glass.png"/>
+                    </ImageView>
+                </graphic>
+            </Label>
+            <Label fx:id="noticeLabel" onMouseClicked="#openNoticeWindow">
+                <graphic>
+                    <ImageView fitHeight="50" fitWidth="50">
+                        <Image url="/gui/img/common/notice.jpg"/>
+                    </ImageView>
+                </graphic>
+            </Label>
+            <Label fx:id="chatLabel" onMouseClicked="#openChatWindow">
+                <graphic>
+                    <ImageView fitHeight="50" fitWidth="50">
+                        <Image url="/gui/img/common/chat.png"/>
+                    </ImageView>
+                </graphic>
+            </Label>
+            <Label fx:id="addGroupLabel" onMouseClicked="#createGroup">
+                <graphic>
+                    <ImageView fitWidth="50" fitHeight="50">
+                        <Image url="/gui/img/common/add_group.jpg"/>
+                    </ImageView>
+                </graphic>
+            </Label>
+        </FlowPane>
+<!--        <Label prefHeight="100" prefWidth="300" style="-fx-background-color: green" text="cccccccccc"/>-->
+    </bottom>
+
+</BorderPane>

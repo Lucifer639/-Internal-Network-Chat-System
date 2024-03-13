@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lucifer.pp.common.mapper.pp.PPFriendChatMapper">
+    <select id="queryFriendChat" resultType="com.lucifer.pp.common.dto.FriendChat">
+        select
+               sender,receiver,created_dt as time,content
+        from
+             pp_friend_chat pfc
+        where (pfc.sender=#{uid} and pfc.receiver=#{friendId}) or (pfc.sender=#{friendId} and pfc.receiver=#{uid})
+                and pfc.status=1
+        order by pfc.created_dt desc
+    </select>
+</mapper>

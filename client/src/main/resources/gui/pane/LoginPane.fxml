@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<?import javafx.scene.control.skin.SplitPaneSkin.Content?>
+<BorderPane xmlns="https://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.lucifer.pp.gui.controller.LoginPaneController"
+            fx:id="loginPane" prefHeight="300" prefWidth="500">
+
+    <center>
+        <GridPane hgap="10" vgap="10" alignment="CENTER">
+            <Label text="服务器地址:" GridPane.rowIndex="0" GridPane.columnIndex="0" alignment="CENTER_RIGHT" prefWidth="80"/>
+            <TextField fx:id="serverIP" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            <Label text="手机号:" GridPane.rowIndex="1" GridPane.columnIndex="0" alignment="CENTER_RIGHT" prefWidth="80"/>
+            <TextField GridPane.rowIndex="1" GridPane.columnIndex="1" fx:id="uid"/>
+            <Label text="密码:" GridPane.rowIndex="2" GridPane.columnIndex="0" alignment="CENTER_RIGHT" prefWidth="80"/>
+            <PasswordField fx:id="password" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            <CheckBox fx:id="remember" GridPane.rowIndex="3" GridPane.columnIndex="0" text="记住我">
+                <GridPane.margin>
+                    <Insets left="30"/>
+                </GridPane.margin>
+            </CheckBox>
+            <CheckBox fx:id="auto" GridPane.rowIndex="3" GridPane.columnIndex="1" text="自动登录">
+                <GridPane.margin>
+                    <Insets left="80"/>
+                </GridPane.margin>
+            </CheckBox>
+            <Button fx:id="register" text="注册" GridPane.rowIndex="4" GridPane.columnIndex="0" onAction="#register">
+                <GridPane.margin>
+                    <Insets left="40"/>
+                </GridPane.margin>
+            </Button>
+            <Button fx:id="login" text="登录" GridPane.rowIndex="4" GridPane.columnIndex="1" onAction="#login">
+                <GridPane.margin>
+                    <Insets left="80"/>
+                </GridPane.margin>
+            </Button>
+        </GridPane>
+    </center>
+</BorderPane>

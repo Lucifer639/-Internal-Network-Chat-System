@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lucifer.pp.common.mapper.pp.PPGroupChatMapper">
+
+    <select id="queryGroupChat" resultType="com.lucifer.pp.common.dto.GroupChat">
+        select
+                sender,su.avatar,group_id,content,pgc.created_dt as time
+        from
+                pp_group_chat pgc
+        left join
+                    sys_user su on pgc.sender=su.id
+        where
+                pgc.group_id=#{groupId} and pgc.status=1
+        order by pgc.created_dt desc
+    </select>
+</mapper>

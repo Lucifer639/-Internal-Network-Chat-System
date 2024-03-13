@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lucifer.pp.common.mapper.pp.PPApplicantMapper">
+
+    <select id="queryApplication" resultType="com.lucifer.pp.common.dto.Application">
+        select
+            pa.applicant_id,pa.receive_id,pa.type,pa.agree,
+        case
+        when pa.type=0 or pa.type=1 then (select su.name from sys_user su where su.id=pa.applicant_id)
+        when pa.type=2 then (select su.name from sys_user su where su.id=pa.user_id)
+        end as userName,
+
+        case pa.type
+        when 0 then null
+        when 1 then (select pg.name from pp_group pg where pg.id=pa.receive_id)
+        when 2 then (select pg.name from pp_group pg where pg.id=pa.applicant_id)
+        end as groupName,
+
+        case
+        when pa.type=0 or pa.type=1 then (select su.avatar from sys_user su where su.id=pa.applicant_id)
+        when pa.type=2 then (select pg.avatar from pp_group pg where pg.id=pa.applicant_id)
+        end as avatar
+
+        from pp_applicant pa
+        where receive_id=#{uid} or receive_id=(
+                select group_id from pp_group_member pgm where pgm.user_id=#{uid} and (pgm.level=0 or pgm.level=1)
+            ) and pa.status=1
+        order by pa.created_dt desc
+    </select>
+</mapper>

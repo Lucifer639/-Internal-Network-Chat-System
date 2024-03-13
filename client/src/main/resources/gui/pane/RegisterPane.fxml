@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.lucifer.pp.gui.controller.RegisterPaneController"
+            fx:id="registerPane"
+>
+
+    <center>
+        <GridPane hgap="10" vgap="10" alignment="CENTER">
+            <Label text="服务器地址:" GridPane.rowIndex="0" GridPane.columnIndex="0" alignment="CENTER_RIGHT" prefWidth="80"/>
+            <TextField fx:id="serverIP" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            <Label text="手机号:" GridPane.rowIndex="1" GridPane.columnIndex="0" alignment="CENTER_RIGHT" prefWidth="80"/>
+            <TextField fx:id="userCode" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            <Label text="昵称:" GridPane.rowIndex="2" GridPane.columnIndex="0" alignment="CENTER_RIGHT" prefWidth="80"/>
+            <TextField GridPane.rowIndex="2" GridPane.columnIndex="1" fx:id="name"/>
+            <Label text="密码:" GridPane.rowIndex="3" GridPane.columnIndex="0" alignment="CENTER_RIGHT" prefWidth="80"/>
+            <PasswordField GridPane.rowIndex="3" GridPane.columnIndex="1" fx:id="password"/>
+            <Label text="确认密码:" GridPane.rowIndex="4" GridPane.columnIndex="0" alignment="CENTER_RIGHT" prefWidth="80"/>
+            <PasswordField fx:id="confirm" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+            <Button fx:id="register" text="确认" GridPane.rowIndex="5" GridPane.columnIndex="0" onAction="#register">
+                <GridPane.margin>
+                    <Insets left="40"/>
+                </GridPane.margin>
+            </Button>
+            <Button fx:id="cancel" text="取消" GridPane.rowIndex="5" GridPane.columnIndex="1" onAction="#cancel">
+                <GridPane.margin>
+                    <Insets left="80"/>
+                </GridPane.margin>
+            </Button>
+        </GridPane>
+    </center>
+
+</BorderPane>

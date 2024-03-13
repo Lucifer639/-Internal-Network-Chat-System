@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lucifer.pp.common.mapper.pp.PPGroupMemberMapper">
+    <select id="queryMemberByGroupId" resultType="com.lucifer.pp.common.dto.GroupMember">
+        select
+               su.id,su.name,su.avatar,pgm.level,
+            case pgm.level
+                when 0 then "群主"
+                when 1 then "管理员"
+                when 2 then "成员"
+            end as levelDescription
+        from
+             sys_user su
+        left join pp_group_member pgm on su.id=pgm.user_id
+        where pgm.group_id=#{groupId} and su.status=1 and pgm.status=1
+    </select>
+</mapper>

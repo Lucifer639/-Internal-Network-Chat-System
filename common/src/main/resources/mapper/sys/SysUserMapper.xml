@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lucifer.pp.common.mapper.sys.SysUserMapper">
+
+    <select id="getPermissionCode" resultType="java.lang.String">
+        SELECT
+            sp.permission_code
+        FROM
+            sys_permission sp
+        JOIN sys_permission_role spr ON sp.id = spr.permission_id
+        JOIN sys_user_role sur ON sur.role_id=spr.role_id and sur.user_id=#{uid}
+    </select>
+</mapper>

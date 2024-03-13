@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.lucifer.pp.gui.controller.SearchPaneController"
+            prefHeight="400.0" prefWidth="600.0">
+
+    <top>
+        <BorderPane prefWidth="600" prefHeight="100">
+            <center>
+                <AnchorPane>
+                    <TextField fx:id="searchWord" prefWidth="200" AnchorPane.leftAnchor="50" promptText="手机号/群号/名称"/>
+                    <RadioButton fx:id="friendRadio" selected="true" AnchorPane.leftAnchor="300" AnchorPane.topAnchor="5">好友</RadioButton>
+                    <RadioButton fx:id="groupRadio" AnchorPane.leftAnchor="350" AnchorPane.topAnchor="5">群</RadioButton>
+                    <Button AnchorPane.rightAnchor="50" fx:id="searchButton">搜索</Button>
+                </AnchorPane>
+            </center>
+        </BorderPane>
+    </top>
+    <center>
+        <TableView fx:id="searchTable" prefWidth="600" prefHeight="300">
+
+        </TableView>
+    </center>
+
+</BorderPane>

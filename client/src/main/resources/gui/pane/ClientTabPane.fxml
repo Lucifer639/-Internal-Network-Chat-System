@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.lucifer.pp.gui.controller.ClientTabPaneController"
+            prefHeight="400.0" prefWidth="300.0">
+    <center>
+        <TabPane prefHeight="400" prefWidth="300">
+            <Tab text="好友" closable="false">
+                <TableView fx:id="friendList">
+
+                </TableView>
+            </Tab>
+            <Tab text="群" closable="false">
+                <TableView fx:id="groupList">
+
+                </TableView>
+            </Tab>
+        </TabPane>
+    </center>
+</BorderPane>

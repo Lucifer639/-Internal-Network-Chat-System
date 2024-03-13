@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.text.Text?>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.lucifer.pp.gui.controller.RegisteringPaneController"
+            fx:id="registeringPane">
+
+    <center>
+        <Text text="注册中,请耐心等待..." style="-fx-font-size: 20px"/>
+    </center>
+    <bottom>
+        <ProgressIndicator/>
+    </bottom>
+
+</BorderPane>
