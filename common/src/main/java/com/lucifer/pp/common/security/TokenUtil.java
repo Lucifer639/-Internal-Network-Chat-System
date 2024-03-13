@@ -10,10 +10,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @desc   使用token验证用户是否登录
- * @author zm
- **/
 public class TokenUtil {
     //设置过期时间
     private static final long EXPIRE_DATE = 24 * 3600 * 1000;

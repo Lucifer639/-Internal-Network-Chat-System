@@ -9,11 +9,6 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 
-/**
- * AES加解密工具类
- * <br>JINJames
- * <br>2022/3/8
- **/
 public class AES {
 
     /**AES密钥标识*/
