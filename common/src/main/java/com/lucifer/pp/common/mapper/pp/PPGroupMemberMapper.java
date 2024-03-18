@@ -12,4 +12,5 @@ import java.util.List;
 @Mapper
 public interface PPGroupMemberMapper extends BaseMapper<PPGroupMember> {
     List<GroupMember> queryMemberByGroupId(Long groupId);
+    GroupMember queryMemberByGroupIdAndUID(Long groupId,Long uid);
 }

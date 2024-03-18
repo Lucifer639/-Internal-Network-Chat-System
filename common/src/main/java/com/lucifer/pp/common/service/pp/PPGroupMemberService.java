@@ -9,4 +9,5 @@ import java.util.List;
 public interface PPGroupMemberService extends BaseService<PPGroupMember> {
     List<GroupMember> queryMemberByGroupId(Long groupId);
     boolean isInGroup(Long uid,Long groupId);
+    GroupMember queryMemberByGroupIdAndUID(Long groupId,Long uid);
 }
