@@ -12,6 +12,7 @@ import com.lucifer.pp.gui.constant.GUIConstant;
 import com.lucifer.pp.gui.util.AlertGenerator;
 import com.lucifer.pp.net.data.*;
 import com.lucifer.pp.net.netenum.ChatEnum;
+import com.lucifer.pp.net.netenum.GroupMemberLevel;
 import com.lucifer.pp.net.netenum.PPProtocolEnum;
 import de.felixroske.jfxsupport.FXMLController;
 import javafx.application.Platform;
@@ -30,6 +31,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -95,6 +97,13 @@ public class ChatPaneController implements Initializable {
     MenuItem showMember = new MenuItem("显示群成员");
     MenuItem invite = new MenuItem("邀请好友入群");
 
+    ContextMenu memberFunctionMenu = new ContextMenu();
+    MenuItem levelUp = new MenuItem("提升为管理员");
+    MenuItem levelDown = new MenuItem("降级为普通成员");
+    MenuItem kick = new MenuItem("踢出群");
+    MenuItem silence = new MenuItem("禁言");
+
+    Long currentMemberId;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -137,6 +146,7 @@ public class ChatPaneController implements Initializable {
         });
 
         initGroupFunctionMenu();
+        initMemberFunctionMenu();
         initEmojiList();
         initChatPane();
     }
@@ -295,9 +305,7 @@ public class ChatPaneController implements Initializable {
         }
         stage.setScene(emojiScene);
         stage.show();
-        emojiScrollPane.setOnMouseExited(mouseEvent1 -> {
-            stage.close();
-        });
+        emojiScrollPane.setOnMouseExited(mouseEvent1 -> stage.close());
     }
 
     //显示文件选择窗口
@@ -350,15 +358,13 @@ public class ChatPaneController implements Initializable {
     }
 
     private void afterSendMsg(CompletableFuture<String> future, String msg){
-        future.whenComplete((s, throwable) -> {
-            Platform.runLater(()->{
-                ScrollPane scrollPane = (ScrollPane) currentChatPane.getTop();
-                ScrollBar vScrollBar = (ScrollBar) scrollPane.lookup(".scroll-bar:vertical");
-                insertChatBubble(false,null,msg);
-                chatHistoryScrollListener.setScrollPane(vScrollBar);
-                vScrollBar.setValue(1.0);
-            });
-        }).exceptionally((e) -> {
+        future.whenComplete((s, throwable) -> Platform.runLater(()->{
+            ScrollPane scrollPane = (ScrollPane) currentChatPane.getTop();
+            ScrollBar vScrollBar = (ScrollBar) scrollPane.lookup(".scroll-bar:vertical");
+            insertChatBubble(false,null,msg);
+            chatHistoryScrollListener.setScrollPane(vScrollBar);
+            vScrollBar.setValue(1.0);
+        })).exceptionally((e) -> {
             AlertGenerator.showError("网络异常，请稍后重试");
             return null;
         });
@@ -509,18 +515,36 @@ public class ChatPaneController implements Initializable {
         chatHistory.getChildren().add(index,hBox);
     }
 
+    private Long getGroupIdByCurrentChatPane(){
+        AtomicReference<Long> groupId = new AtomicReference<>();
+        chatPaneMap.forEach((k,v)->{
+            if (v == currentChatPane){
+                groupId.set(k);
+            }
+        });
+        return groupId.get();
+    }
+
     private void initGroupFunctionMenu(){
         groupFunctionMenu.getItems().addAll(showMember,invite);
         showMember.setOnAction(actionEvent -> {
+            Long groupId = getGroupIdByCurrentChatPane();
+            if (ObjectUtil.isEmpty(groupId)) return;
+            initGroupMemberList(groupId);
+        });
+    }
 
-            AtomicReference<Long> groupId = new AtomicReference<>();
-            chatPaneMap.forEach((k,v)->{
-                if (v == currentChatPane){
-                    groupId.set(k);
-                }
-            });
-            if (ObjectUtil.isEmpty(groupId.get())) return;
-            initGroupMemberList(groupId.get());
+    private void initMemberFunctionMenu(){
+        memberFunctionMenu.getItems().addAll(levelUp,levelDown,silence,kick);
+        levelUp.setOnAction(actionEvent -> {
+            Long groupId = getGroupIdByCurrentChatPane();
+            if (ObjectUtil.isEmpty(groupId)) return;
+            levelUpdateMember(GroupMemberLevel.MANAGER);
+        });
+        levelDown.setOnAction(actionEvent -> {
+            Long groupId = getGroupIdByCurrentChatPane();
+            if (ObjectUtil.isEmpty(groupId)) return;
+            levelUpdateMember(GroupMemberLevel.MEMBER);
         });
     }
 
@@ -569,7 +593,20 @@ public class ChatPaneController implements Initializable {
             row.setMaxHeight(50);
             return row;
         });
+        tableView.setOnMouseClicked(mouseEvent -> {
+            int index = tableView.getSelectionModel().getSelectedIndex();
+            GroupMember member = tableView.getItems().get(index);
+            currentMemberId = member.getId();
+            if (mouseEvent.getClickCount() == 1){
+                memberFunctionMenu.hide();
+            }
+            if (mouseEvent.getClickCount() == 2 || mouseEvent.getButton() == MouseButton.SECONDARY){
+                double screenX = tableView.localToScreen(mouseEvent.getX(), 0).getX();
+                double screenY = tableView.localToScreen(0, mouseEvent.getY()).getY();
 
+                memberFunctionMenu.show(tableView, screenX, screenY);
+            }
+        });
         stage.setScene(scene);
         stage.show();
     }
@@ -578,6 +615,15 @@ public class ChatPaneController implements Initializable {
         double screenX = label.localToScreen(mouseEvent.getX(), 0).getX();
         double screenY = label.localToScreen(0, mouseEvent.getY()).getY();
         groupFunctionMenu.show(label,screenX,screenY);
+    }
+
+    private void levelUpdateMember(GroupMemberLevel groupMemberLevel){
+        Optional<ButtonType> buttonType = AlertGenerator.showConfirm("你确定要这么做吗?");
+        if (buttonType.isEmpty() || buttonType.get() == ButtonType.CANCEL) return;
+        LevelUpdateMemberData data = new LevelUpdateMemberData(PPClientContext.token,getGroupIdByCurrentChatPane(),
+                currentMemberId, groupMemberLevel);
+        PPProtocol<LevelUpdateMemberData> ppProtocol = PPProtocol.of(PPProtocolEnum.LEVEL_UPDATE_MEMBER,data);
+        netUtil.sendMessage(ppProtocol);
     }
 
 
