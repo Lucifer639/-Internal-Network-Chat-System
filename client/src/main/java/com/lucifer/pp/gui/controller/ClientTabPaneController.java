@@ -96,7 +96,7 @@ public class ClientTabPaneController implements Initializable {
             }
         });
 
-        showContextMenu(friendList,friendMenu);
+        GUIConstant.showContextMenuOnTableView(friendList,friendMenu);
 
         friendColumn.prefWidthProperty().bind(friendList.widthProperty());
         friendList.getColumns().add(friendColumn);
@@ -138,7 +138,7 @@ public class ClientTabPaneController implements Initializable {
             }
         });
 
-        showContextMenu(groupList,groupMenu);
+        GUIConstant.showContextMenuOnTableView(groupList,groupMenu);
 
         groupColumn.prefWidthProperty().bind(groupList.widthProperty());
         groupList.getColumns().add(groupColumn);
@@ -203,20 +203,6 @@ public class ClientTabPaneController implements Initializable {
                     });
                 }
             });
-        });
-    }
-
-    private void showContextMenu(TableView<?> tableView,ContextMenu menu){
-        tableView.setOnMouseClicked(mouseEvent -> {
-            if (mouseEvent.getClickCount() == 1){
-                menu.hide();
-            }
-            if (mouseEvent.getClickCount() == 2 || mouseEvent.getButton() == MouseButton.SECONDARY){
-                double screenX = tableView.localToScreen(mouseEvent.getX(), 0).getX();
-                double screenY = tableView.localToScreen(0, mouseEvent.getY()).getY();
-
-                menu.show(tableView, screenX, screenY);
-            }
         });
     }
 

@@ -1,8 +1,12 @@
 package com.lucifer.pp.gui.constant;
 
 import cn.hutool.core.util.ObjectUtil;
+import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -59,5 +63,18 @@ public class GUIConstant {
             Image image = new Image(new ByteArrayInputStream(bytes));
             return new ImageView(image);
         }
+    }
+    public static void showContextMenuOnTableView(TableView<?> tableView, ContextMenu menu){
+        tableView.setOnMouseClicked(mouseEvent -> {
+            if (mouseEvent.getClickCount() == 1){
+                menu.hide();
+            }
+            if (mouseEvent.getClickCount() == 2 || mouseEvent.getButton() == MouseButton.SECONDARY){
+                double screenX = tableView.localToScreen(mouseEvent.getX(), 0).getX();
+                double screenY = tableView.localToScreen(0, mouseEvent.getY()).getY();
+
+                menu.show(tableView, screenX, screenY);
+            }
+        });
     }
 }
