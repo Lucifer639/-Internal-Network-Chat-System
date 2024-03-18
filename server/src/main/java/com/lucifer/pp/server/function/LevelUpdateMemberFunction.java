@@ -46,21 +46,27 @@ public class LevelUpdateMemberFunction implements PPFunction{
         queryWrapper.eq("group_id",data.getGroupId())
                 .eq("user_id", UserContext.getUID());
         PPGroupMember leader = groupMemberService.getOne(queryWrapper);
-        if (ObjectUtil.isEmpty(leader) || !leader.getLevel().equals(GroupMemberLevel.LEADER.level)
-            || !groupMemberService.isInGroup(data.getMemberId(),data.getGroupId())) return ChannelContext.release();
-
-        UpdateWrapper<PPGroupMember> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("group_id",data.getGroupId())
+        queryWrapper.clear();
+        queryWrapper.eq("group_id",data.getGroupId())
                 .eq("user_id",data.getMemberId());
+        GroupMember groupMember = groupMemberService.queryMemberByGroupIdAndUID(data.getGroupId(), data.getMemberId());
+        if (ObjectUtil.isEmpty(leader) || !leader.getLevel().equals(GroupMemberLevel.LEADER.level)
+            || ObjectUtil.isEmpty(groupMember)) return ChannelContext.release();
+
+
+        PPGroupMember member = groupMemberService.getOne(queryWrapper);
         if (data.getMemberLevel() == GroupMemberLevel.MANAGER){
-            updateWrapper.set("level",GroupMemberLevel.MANAGER.level);
-            groupMemberService.update(updateWrapper);
+            member.setLevel(GroupMemberLevel.MANAGER.level);
+            groupMember.setLevel(GroupMemberLevel.MANAGER.level);
+            groupMember.setLevelDescription(GroupMemberLevel.MANAGER.levelDescription);
+            groupMemberService.doUpdate(member);
         }else if (data.getMemberLevel() == GroupMemberLevel.MEMBER){
-            updateWrapper.set("level",GroupMemberLevel.MEMBER.level);
-            groupMemberService.update(updateWrapper);
+            member.setLevel(GroupMemberLevel.MEMBER.level);
+            groupMember.setLevel(GroupMemberLevel.MEMBER.level);
+            groupMember.setLevelDescription(GroupMemberLevel.MEMBER.levelDescription);
+            groupMemberService.doUpdate(member);
         }
 
-        GroupMember groupMember = groupMemberService.queryMemberByGroupIdAndUID(data.getGroupId(),data.getMemberId());
         UpdateMemberData response = new UpdateMemberData(data.getGroupId(),groupMember);
         PPProtocol<UpdateMemberData> ppProtocol = PPProtocol.of(PPProtocolEnum.UPDATE_GROUP_MEMBER,response);
         Objects.requireNonNull(ChannelContext.getChannel()).writeAndFlush(JSONUtil.toJsonStr(ppProtocol));
