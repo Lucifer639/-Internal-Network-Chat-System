@@ -619,11 +619,11 @@ public class ChatPaneController implements Initializable {
 
     private void levelUpdateMember(GroupMemberLevel groupMemberLevel){
         Optional<ButtonType> buttonType = AlertGenerator.showConfirm("你确定要这么做吗?");
+        if (buttonType.isEmpty() || buttonType.get() == ButtonType.CANCEL) return;
         if (currentMemberId.equals(PPClientContext.uid)){
             AlertGenerator.showError("无法对自己进行该操作");
             return;
         }
-        if (buttonType.isEmpty() || buttonType.get() == ButtonType.CANCEL) return;
         LevelUpdateMemberData data = new LevelUpdateMemberData(PPClientContext.token,getGroupIdByCurrentChatPane(),
                 currentMemberId, groupMemberLevel);
         PPProtocol<LevelUpdateMemberData> ppProtocol = PPProtocol.of(PPProtocolEnum.LEVEL_UPDATE_MEMBER,data);
