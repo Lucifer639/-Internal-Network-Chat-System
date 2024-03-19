@@ -28,7 +28,6 @@ public class UpdateGroupMemberFunction implements PPFunction{
                 .filter(group -> group.getId().equals(data.getGroupId()))
                 .findFirst();
         if (groupOptional.isEmpty()) return null;
-        System.out.println(groupOptional.get());
         Optional<GroupMember> groupMemberOptional = groupOptional.get().getMembers().stream()
                 .filter(groupMember -> groupMember.getId().equals(data.getGroupMember().getId()))
                 .findFirst();
@@ -38,7 +37,6 @@ public class UpdateGroupMemberFunction implements PPFunction{
         groupMember.setLevel(data.getGroupMember().getLevel());
         groupMember.setLevelDescription(data.getGroupMember().getLevelDescription());
         groupMember.setName(data.getGroupMember().getName());
-        System.out.println(groupOptional.get());
         return ChannelContext.release();
     }
 }
