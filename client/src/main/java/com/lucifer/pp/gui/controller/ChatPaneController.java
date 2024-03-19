@@ -548,6 +548,11 @@ public class ChatPaneController implements Initializable {
             if (ObjectUtil.isEmpty(groupId)) return;
             levelUpdateMember(GroupMemberLevel.MEMBER);
         });
+        kick.setOnAction(actionEvent -> {
+            Long groupId = getGroupIdByCurrentChatPane();
+            if (ObjectUtil.isEmpty(groupId)) return;
+            kickMember();
+        });
     }
 
     private void initGroupMemberList(Long groupId){
@@ -639,12 +644,35 @@ public class ChatPaneController implements Initializable {
         PPProtocol<LevelUpdateMemberData> ppProtocol = PPProtocol.of(PPProtocolEnum.LEVEL_UPDATE_MEMBER,data);
         CompletableFuture<String> future = netUtil.sendMessage(ppProtocol);
         future.whenComplete((res,throwable)->{
+            if (ObjectUtil.isEmpty(currentMemberList)) return;
             Optional<GroupMember> optionalGroupMember = currentMemberList.stream()
                     .filter(groupMember -> groupMember.getId().equals(currentMemberId))
                     .findFirst();
             optionalGroupMember.ifPresent(groupMember -> {
                 groupMember.setLevel(groupMemberLevel.level);
                 groupMember.setLevelDescription(groupMemberLevel.levelDescription);
+                currentMemberTable.refresh();
+            });
+        });
+    }
+
+    private void kickMember(){
+        Optional<ButtonType> buttonType = AlertGenerator.showConfirm("你确定要这么做吗?");
+        if (buttonType.isEmpty() || buttonType.get() == ButtonType.CANCEL) return;
+        if (currentMemberId.equals(PPClientContext.uid)){
+            AlertGenerator.showError("无法对自己进行该操作");
+            return;
+        }
+        KickMemberData data = new KickMemberData(PPClientContext.token,getGroupIdByCurrentChatPane(),currentMemberId);
+        PPProtocol<KickMemberData> ppProtocol = PPProtocol.of(PPProtocolEnum.KICK_MEMBER,data);
+        CompletableFuture<String> future = netUtil.sendMessage(ppProtocol);
+        future.whenComplete((res,throwable)->{
+            if (ObjectUtil.isEmpty(currentMemberList)) return;
+            Optional<GroupMember> optionalGroupMember = currentMemberList.stream()
+                    .filter(groupMember -> groupMember.getId().equals(currentMemberId))
+                    .findFirst();
+            optionalGroupMember.ifPresent(groupMember -> {
+                currentMemberList.remove(groupMember);
                 currentMemberTable.refresh();
             });
         });
