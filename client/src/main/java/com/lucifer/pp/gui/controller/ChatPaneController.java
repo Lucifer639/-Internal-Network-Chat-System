@@ -104,6 +104,8 @@ public class ChatPaneController implements Initializable {
     MenuItem silence = new MenuItem("禁言");
 
     Long currentMemberId;
+    ObservableList<GroupMember> currentMemberList = null;
+    TableView<GroupMember> currentMemberTable = null;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -554,11 +556,15 @@ public class ChatPaneController implements Initializable {
         scrollPane.setPrefWidth(300);
         Scene scene = new Scene(scrollPane);
         TableView<GroupMember> tableView = new TableView<>();
+        currentMemberTable = tableView;
         Optional<ObservableList<GroupMember>> optionalGroupMembers = PPClientContext.groups.stream()
                 .filter(group -> group.getId().equals(groupId))
                 .map(group -> FXCollections.observableArrayList(group.getMembers()))
                 .findFirst();
-        optionalGroupMembers.ifPresent(tableView::setItems);
+        optionalGroupMembers.ifPresent(groupMembers -> {
+            currentMemberList = groupMembers;
+            tableView.setItems(groupMembers);
+        });
         scrollPane.setContent(tableView);
         tableView.prefWidthProperty().bind(scrollPane.widthProperty().subtract(15));
         TableColumn<GroupMember,GroupMember> tableColumn = new TableColumn<>();
@@ -609,6 +615,10 @@ public class ChatPaneController implements Initializable {
         });
         stage.setScene(scene);
         stage.show();
+        stage.setOnCloseRequest(windowEvent -> {
+            currentMemberList = null;
+            currentMemberTable = null;
+        });
     }
 
     private void showGroupFunctionMenu(Label label,MouseEvent mouseEvent){
@@ -627,7 +637,17 @@ public class ChatPaneController implements Initializable {
         LevelUpdateMemberData data = new LevelUpdateMemberData(PPClientContext.token,getGroupIdByCurrentChatPane(),
                 currentMemberId, groupMemberLevel);
         PPProtocol<LevelUpdateMemberData> ppProtocol = PPProtocol.of(PPProtocolEnum.LEVEL_UPDATE_MEMBER,data);
-        netUtil.sendMessage(ppProtocol);
+        CompletableFuture<String> future = netUtil.sendMessage(ppProtocol);
+        future.whenComplete((res,throwable)->{
+            Optional<GroupMember> optionalGroupMember = currentMemberList.stream()
+                    .filter(groupMember -> groupMember.getId().equals(currentMemberId))
+                    .findFirst();
+            optionalGroupMember.ifPresent(groupMember -> {
+                groupMember.setLevel(groupMemberLevel.level);
+                groupMember.setLevelDescription(groupMemberLevel.levelDescription);
+                currentMemberTable.refresh();
+            });
+        });
     }
 
 
