@@ -639,6 +639,16 @@ public class ChatPaneController implements Initializable {
             AlertGenerator.showError("无法对自己进行该操作");
             return;
         }
+        GroupMember self = currentMemberList.stream()
+                .filter(groupMember -> groupMember.getId().equals(PPClientContext.uid))
+                .findFirst().orElse(null);
+        if (ObjectUtil.isEmpty(self)) return;
+        assert self != null;
+        if (!self.getLevel().equals(GroupMemberLevel.LEADER.level)){
+            AlertGenerator.showError("权限不足");
+            return;
+        }
+
         LevelUpdateMemberData data = new LevelUpdateMemberData(PPClientContext.token,getGroupIdByCurrentChatPane(),
                 currentMemberId, groupMemberLevel);
         PPProtocol<LevelUpdateMemberData> ppProtocol = PPProtocol.of(PPProtocolEnum.LEVEL_UPDATE_MEMBER,data);
@@ -663,18 +673,27 @@ public class ChatPaneController implements Initializable {
             AlertGenerator.showError("无法对自己进行该操作");
             return;
         }
+        GroupMember member = currentMemberList.stream()
+                .filter(groupMember -> groupMember.getId().equals(currentMemberId))
+                .findFirst().orElse(null);
+        GroupMember self = currentMemberList.stream()
+                .filter(groupMember -> groupMember.getId().equals(PPClientContext.uid))
+                .findFirst().orElse(null);
+        if (ObjectUtil.isEmpty(member) || ObjectUtil.isEmpty(self)) return;
+        assert self != null;
+        assert member != null;
+        if (self.getLevel().equals(GroupMemberLevel.MEMBER.level) ||
+                (self.getLevel().equals(GroupMemberLevel.MANAGER.level) && member.getLevel().equals(GroupMemberLevel.MANAGER.level))){
+            AlertGenerator.showError("权限不足");
+            return;
+        }
+
         KickMemberData data = new KickMemberData(PPClientContext.token,getGroupIdByCurrentChatPane(),currentMemberId);
         PPProtocol<KickMemberData> ppProtocol = PPProtocol.of(PPProtocolEnum.KICK_MEMBER,data);
         CompletableFuture<String> future = netUtil.sendMessage(ppProtocol);
         future.whenComplete((res,throwable)->{
             if (ObjectUtil.isEmpty(currentMemberList)) return;
-            Optional<GroupMember> optionalGroupMember = currentMemberList.stream()
-                    .filter(groupMember -> groupMember.getId().equals(currentMemberId))
-                    .findFirst();
-            optionalGroupMember.ifPresent(groupMember -> {
-                currentMemberList.remove(groupMember);
-                currentMemberTable.refresh();
-            });
+            currentMemberList.remove(member);
         });
     }
 

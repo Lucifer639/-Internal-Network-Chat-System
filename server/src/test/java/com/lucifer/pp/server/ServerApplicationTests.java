@@ -29,7 +29,9 @@ class ServerApplicationTests {
 
     @Test
     void contextLoads() {
-        System.out.println(userRoleService.hasRole(1721127931232755713L, BaseConstant.GROUP_LEADER));
+        List<Integer> list = Arrays.asList(1,2,3,4,5);
+        Integer integer = list.stream().filter(i -> i.equals(6)).findFirst().orElse(7);
+        System.out.println(integer);
     }
 
 }
