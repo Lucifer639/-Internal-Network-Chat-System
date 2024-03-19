@@ -7,4 +7,5 @@ import org.springframework.stereotype.Component;
 @Component
 public interface SysUserRoleService extends BaseService<SysUserRole> {
     boolean hasRole(Long uid, String roleCode);
+    Long addRole(Long uid,String roleCode);
 }

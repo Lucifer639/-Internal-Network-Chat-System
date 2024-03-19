@@ -83,7 +83,7 @@ public class DisbandGroupFunction implements PPFunction{
         memberWrapper.clear();
         memberWrapper.eq("user_id",UserContext.getUID())
                 .eq("level", GroupMemberLevel.LEADER.level);
-        //该用户没有群主身份
+        //该用户没有群主身份,则移除群主权限
         if (ObjectUtil.isEmpty(groupMemberService.getOne(memberWrapper))){
             QueryWrapper<SysUserRole> wrapper = new QueryWrapper<>();
             SysRole groupLeader = roleService.findByRoleCode(BaseConstant.GROUP_LEADER);
