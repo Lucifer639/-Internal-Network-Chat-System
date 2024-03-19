@@ -3,13 +3,14 @@
 <mapper namespace="com.lucifer.pp.common.mapper.sys.SysUserRoleMapper">
 
     <select id="getRoleIdByUIDAndRoleCode" resultType="java.lang.Long">
-        select
-                sr.id
-        from
-                sys_role sr
-        left join
-                sys_user_role sur on sur.role_id=sr.id and sur.user_id=#{uid}
-        where
-                sr.role_code=#{roleCode} and sr.status=1
+        SELECT
+            sur.role_id
+        FROM
+            sys_user_role sur
+                JOIN sys_role sr ON sur.role_id = sr.id
+                AND sr.role_code = #{roleCode}
+        WHERE
+            sur.user_id = #{uid}
+            AND sur.STATUS =1
     </select>
 </mapper>
