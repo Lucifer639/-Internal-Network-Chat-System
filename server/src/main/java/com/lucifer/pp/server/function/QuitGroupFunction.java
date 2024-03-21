@@ -21,6 +21,7 @@ import com.lucifer.pp.net.data.PPProtocol;
 import com.lucifer.pp.net.data.QuitGroupData;
 import com.lucifer.pp.net.netenum.GroupMemberLevel;
 import com.lucifer.pp.net.netenum.PPProtocolEnum;
+import com.lucifer.pp.net.netenum.SysRoleEnum;
 import com.lucifer.pp.server.pojo.HeartBeatContext;
 import com.lucifer.pp.server.util.NetUtil;
 import com.lucifer.pp.server.util.RedisUtil;
@@ -65,7 +66,7 @@ public class QuitGroupFunction implements PPFunction{
                 netUtil.sendMessage(context.getIp(), BaseConstant.CLIENT_PORT, JSONUtil.toJsonStr(ppProtocol));
             }
         });
-        SysRole manager = roleService.findByRoleCode(BaseConstant.GROUP_MANAGER);
+        SysRole manager = roleService.findByRoleCode(SysRoleEnum.GROUP_MANAGER.roleCode);
         wrapper.clear();
         wrapper.eq("user_id",UserContext.getUID())
                 .eq("level", GroupMemberLevel.MANAGER.level);

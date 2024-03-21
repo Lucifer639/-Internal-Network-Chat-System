@@ -21,6 +21,7 @@ import com.lucifer.pp.net.data.CreateGroupResponseData;
 import com.lucifer.pp.net.data.PPProtocol;
 import com.lucifer.pp.net.netenum.GroupMemberLevel;
 import com.lucifer.pp.net.netenum.PPProtocolEnum;
+import com.lucifer.pp.net.netenum.SysRoleEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,13 +48,13 @@ public class CreateGroupRequestFunction implements PPFunction{
     @Transactional
     public Object apply(Object o) {
         CreateGroupRequestData data = ((JSONObject) o).toBean(CreateGroupRequestData.class);
-        boolean isGroupLeader = userRoleService.hasRole(UserContext.getUID(), BaseConstant.GROUP_LEADER);
+        boolean isGroupLeader = userRoleService.hasRole(UserContext.getUID(), SysRoleEnum.GROUP_LEADER.roleCode);
         PPGroup ppGroup = new PPGroup(data.getGroupName(),null);
         Long groupId = groupService.doAdd(ppGroup);
         PPGroupMember groupMember = new PPGroupMember(groupId,UserContext.getUID(), GroupMemberLevel.LEADER.level);
         groupMemberService.doAdd(groupMember);
         if (!isGroupLeader){
-            SysRole role = roleService.findByRoleCode(BaseConstant.GROUP_LEADER);
+            SysRole role = roleService.findByRoleCode(SysRoleEnum.GROUP_LEADER.roleCode);
             SysUserRole userRole = new SysUserRole(UserContext.getUID(),role.getId());
             userRoleService.doAdd(userRole);
         }

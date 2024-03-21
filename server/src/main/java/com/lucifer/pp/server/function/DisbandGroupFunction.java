@@ -23,6 +23,7 @@ import com.lucifer.pp.net.data.PPProtocol;
 import com.lucifer.pp.net.netenum.GroupMemberLevel;
 import com.lucifer.pp.net.netenum.PPProtocolEnum;
 import com.lucifer.pp.net.netenum.StatusEnum;
+import com.lucifer.pp.net.netenum.SysRoleEnum;
 import com.lucifer.pp.server.pojo.HeartBeatContext;
 import com.lucifer.pp.server.util.MessageGenerator;
 import com.lucifer.pp.server.util.NetUtil;
@@ -86,7 +87,7 @@ public class DisbandGroupFunction implements PPFunction{
         //该用户没有群主身份,则移除群主权限
         if (ObjectUtil.isEmpty(groupMemberService.getOne(memberWrapper))){
             QueryWrapper<SysUserRole> wrapper = new QueryWrapper<>();
-            SysRole groupLeader = roleService.findByRoleCode(BaseConstant.GROUP_LEADER);
+            SysRole groupLeader = roleService.findByRoleCode(SysRoleEnum.GROUP_LEADER.roleCode);
             wrapper.eq("user_id",UserContext.getUID())
                     .eq("role_id",groupLeader.getId());
             userRoleService.remove(wrapper);

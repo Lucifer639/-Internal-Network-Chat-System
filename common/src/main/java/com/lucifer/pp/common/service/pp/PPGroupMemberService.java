@@ -10,4 +10,5 @@ public interface PPGroupMemberService extends BaseService<PPGroupMember> {
     List<GroupMember> queryMemberByGroupId(Long groupId);
     boolean isInGroup(Long uid,Long groupId);
     GroupMember queryMemberByGroupIdAndUID(Long groupId,Long uid);
+    PPGroupMember queryPPGroupMember(Long groupId,Long uid);
 }

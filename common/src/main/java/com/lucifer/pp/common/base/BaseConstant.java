@@ -38,9 +38,4 @@ public class BaseConstant {
     public final static String UPDATE_GROUP_MEMBER_CODE = "UPDATE_GROUP_MEMBER";
     public final static String GROUP_CHAT_SILENCE_CODE = "GROUP_CHAT_SILENCE";
     public final static String DISBAND_GROUP_CODE = "DISBAND_GROUP";
-    // 角色码相关
-    public final static String ROOT = "ROOT";
-    public final static String GROUP_LEADER = "GROUP_LEADER";
-    public final static String GROUP_MANAGER = "GROUP_MANAGER";
-    public final static String NORMAL = "NORMAL";
 }

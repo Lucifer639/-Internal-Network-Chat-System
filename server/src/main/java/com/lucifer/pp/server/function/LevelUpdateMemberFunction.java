@@ -22,6 +22,7 @@ import com.lucifer.pp.net.data.PPProtocol;
 import com.lucifer.pp.net.data.UpdateMemberData;
 import com.lucifer.pp.net.netenum.GroupMemberLevel;
 import com.lucifer.pp.net.netenum.PPProtocolEnum;
+import com.lucifer.pp.net.netenum.SysRoleEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,39 +49,33 @@ public class LevelUpdateMemberFunction implements PPFunction{
     @Transactional
     public Object apply(Object o) {
         LevelUpdateMemberData data = ((JSONObject) o).toBean(LevelUpdateMemberData.class);
-        QueryWrapper<PPGroupMember> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("group_id",data.getGroupId())
-                .eq("user_id", UserContext.getUID());
-        PPGroupMember leader = groupMemberService.getOne(queryWrapper);
-        queryWrapper.clear();
-        queryWrapper.eq("group_id",data.getGroupId())
-                .eq("user_id",data.getMemberId());
+        PPGroupMember leader = groupMemberService.queryPPGroupMember(data.getGroupId(),UserContext.getUID());
         GroupMember groupMember = groupMemberService.queryMemberByGroupIdAndUID(data.getGroupId(), data.getMemberId());
         if (ObjectUtil.isEmpty(leader) || !leader.getLevel().equals(GroupMemberLevel.LEADER.level)
             || ObjectUtil.isEmpty(groupMember)) return ChannelContext.release();
 
 
-        PPGroupMember member = groupMemberService.getOne(queryWrapper);
+        PPGroupMember member = groupMemberService.queryPPGroupMember(data.getGroupId(),data.getMemberId());
         if (data.getMemberLevel() == GroupMemberLevel.MANAGER){
             member.setLevel(GroupMemberLevel.MANAGER.level);
             groupMember.setLevel(GroupMemberLevel.MANAGER.level);
             groupMember.setLevelDescription(GroupMemberLevel.MANAGER.levelDescription);
             groupMemberService.doUpdate(member);
-            if (!userRoleService.hasRole(data.getMemberId(),BaseConstant.GROUP_MANAGER)){
-                userRoleService.addRole(data.getMemberId(),BaseConstant.GROUP_MANAGER);
+            if (!userRoleService.hasRole(data.getMemberId(), SysRoleEnum.GROUP_MANAGER.roleCode)){
+                userRoleService.addRole(data.getMemberId(),SysRoleEnum.GROUP_MANAGER.roleCode);
             }
         }else if (data.getMemberLevel() == GroupMemberLevel.MEMBER){
             member.setLevel(GroupMemberLevel.MEMBER.level);
             groupMember.setLevel(GroupMemberLevel.MEMBER.level);
             groupMember.setLevelDescription(GroupMemberLevel.MEMBER.levelDescription);
             groupMemberService.doUpdate(member);
-            queryWrapper.clear();
+            QueryWrapper<PPGroupMember> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("user_id",data.getMemberId())
                     .eq("level",GroupMemberLevel.MANAGER.level);
             //该用户没有管理员身份,则移除管理员权限
             if (ObjectUtil.isEmpty(groupMemberService.getOne(queryWrapper))){
                 QueryWrapper<SysUserRole> wrapper = new QueryWrapper<>();
-                SysRole groupManager = roleService.findByRoleCode(BaseConstant.GROUP_MANAGER);
+                SysRole groupManager = roleService.findByRoleCode(SysRoleEnum.GROUP_MANAGER.roleCode);
                 wrapper.eq("user_id",data.getMemberId())
                         .eq("role_id",groupManager.getId());
                 SysUserRole one = userRoleService.getOne(wrapper);

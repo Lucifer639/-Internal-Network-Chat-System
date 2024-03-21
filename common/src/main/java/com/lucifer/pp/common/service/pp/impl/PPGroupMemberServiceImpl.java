@@ -29,6 +29,14 @@ public class PPGroupMemberServiceImpl extends BaseServiceImpl<PPGroupMemberMappe
     }
 
     @Override
+    public PPGroupMember queryPPGroupMember(Long groupId, Long uid) {
+        QueryWrapper<PPGroupMember> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("group_id",groupId)
+                .eq("user_id",uid);
+        return this.getOne(queryWrapper);
+    }
+
+    @Override
     public boolean isInGroup(Long uid, Long groupId) {
         return ObjectUtil.isNotEmpty(queryMemberByGroupIdAndUID(groupId,uid));
     }
