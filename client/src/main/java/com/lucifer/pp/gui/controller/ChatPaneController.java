@@ -11,6 +11,7 @@ import com.lucifer.pp.common.dto.GroupMember;
 import com.lucifer.pp.gui.constant.GUIConstant;
 import com.lucifer.pp.gui.util.AlertGenerator;
 import com.lucifer.pp.net.data.*;
+import com.lucifer.pp.net.netenum.ApplyType;
 import com.lucifer.pp.net.netenum.ChatEnum;
 import com.lucifer.pp.net.netenum.GroupMemberLevel;
 import com.lucifer.pp.net.netenum.PPProtocolEnum;
@@ -60,7 +61,10 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.regex.Matcher;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @FXMLController
 public class ChatPaneController implements Initializable {
@@ -103,6 +107,10 @@ public class ChatPaneController implements Initializable {
     MenuItem kick = new MenuItem("踢出群");
     MenuItem silence = new MenuItem("禁言");
 
+    ContextMenu inviteMenu = new ContextMenu();
+    MenuItem inviteFriend = new MenuItem("邀请");
+
+    Long currentFriendId;
     Long currentMemberId;
     ObservableList<GroupMember> currentMemberList = null;
     TableView<GroupMember> currentMemberTable = null;
@@ -534,10 +542,16 @@ public class ChatPaneController implements Initializable {
             if (ObjectUtil.isEmpty(groupId)) return;
             initGroupMemberList(groupId);
         });
+        invite.setOnAction(actionEvent -> {
+            Long groupId = getGroupIdByCurrentChatPane();
+            if (ObjectUtil.isEmpty(groupId)) return;
+            initNotInGroupFriendList(groupId);
+        });
     }
 
     private void initMemberFunctionMenu(){
         memberFunctionMenu.getItems().addAll(levelUp,levelDown,silence,kick);
+        inviteMenu.getItems().add(inviteFriend);
         levelUp.setOnAction(actionEvent -> {
             Long groupId = getGroupIdByCurrentChatPane();
             if (ObjectUtil.isEmpty(groupId)) return;
@@ -553,6 +567,7 @@ public class ChatPaneController implements Initializable {
             if (ObjectUtil.isEmpty(groupId)) return;
             kickMember();
         });
+        inviteFriend.setOnAction(actionEvent -> inviteFriend());
     }
 
     private void initGroupMemberList(Long groupId){
@@ -614,16 +629,100 @@ public class ChatPaneController implements Initializable {
             if (mouseEvent.getClickCount() == 2 || mouseEvent.getButton() == MouseButton.SECONDARY){
                 double screenX = tableView.localToScreen(mouseEvent.getX(), 0).getX();
                 double screenY = tableView.localToScreen(0, mouseEvent.getY()).getY();
-
                 memberFunctionMenu.show(tableView, screenX, screenY);
             }
         });
         stage.setScene(scene);
         stage.show();
         stage.setOnCloseRequest(windowEvent -> {
+            currentMemberId = null;
             currentMemberList = null;
             currentMemberTable = null;
         });
+    }
+
+    private void initNotInGroupFriendList(Long groupId){
+        Optional<List<GroupMember>> optionalGroupMembers = PPClientContext.groups.stream()
+                .filter(group -> group.getId().equals(groupId))
+                .map(Group::getMembers)
+                .findFirst();
+        if (optionalGroupMembers.isEmpty()) return;
+
+        //找出所有不在该群的好友
+        Map<Long, GroupMember> map = optionalGroupMembers.get().stream()
+                .collect(Collectors.toMap(GroupMember::getId, Function.identity()));
+        ObservableList<Friend> result = PPClientContext.friends.stream()
+                .filter(friend -> !map.containsKey(friend.getId()))
+                .collect(Collectors.collectingAndThen(
+                        Collector.of(
+                                FXCollections::observableArrayList,
+                                List::add,
+                                (item1, item2) -> item1,
+                                Function.identity(),
+                                Collector.Characteristics.UNORDERED
+                        ),
+                        Function.identity()
+                ));
+
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setPrefWidth(300);
+        Stage stage = new Stage();
+        Scene scene = new Scene(scrollPane);
+        TableView<Friend> tableView = new TableView<>();
+        scrollPane.setContent(tableView);
+        tableView.setItems(result);
+        tableView.prefWidthProperty().bind(scrollPane.widthProperty().subtract(15));
+
+        TableColumn<Friend,Friend> tableColumn = new TableColumn<>();
+        tableColumn.setCellValueFactory((param)-> new SimpleObjectProperty<>(param.getValue()));
+        tableColumn.setCellFactory(memberTableColumn-> new TableCell<>(){
+            @Override
+            protected void updateItem(Friend friend,boolean empty){
+                super.updateItem(friend,empty);
+                if (ObjectUtil.isNotEmpty(friend) && !empty){
+                    HBox hBox = new HBox();
+                    ImageView avatar = GUIConstant.initUserAvatar(friend.getAvatar());
+                    avatar.setFitHeight(50);
+                    avatar.setFitWidth(50);
+                    Label nameLabel = new Label(friend.getName());
+                    Label isOnlineLabel = new Label(friend.isOnline()?"在线":"离线");
+                    hBox.getChildren().addAll(avatar,nameLabel,isOnlineLabel);
+                    hBox.setAlignment(Pos.CENTER_LEFT);
+                    HBox.setMargin(nameLabel,new Insets(0,0,0,20));
+                    HBox.setMargin(isOnlineLabel,new Insets(0,0,0,20));
+                    this.setGraphic(hBox);
+                }else{
+                    this.setGraphic(null);
+                }
+            }
+        });
+
+        tableColumn.prefWidthProperty().bind(tableView.widthProperty().subtract(5));
+        tableView.getColumns().add(tableColumn);
+        tableView.setRowFactory((tv) -> {
+            TableRow<Friend> row = new TableRow<>();
+            row.setMinHeight(50);
+            row.setMaxHeight(50);
+            return row;
+        });
+
+        tableView.setOnMouseClicked(mouseEvent -> {
+            int index = tableView.getSelectionModel().getSelectedIndex();
+            Friend friend = tableView.getItems().get(index);
+            currentFriendId = friend.getId();
+            if (mouseEvent.getClickCount() == 1){
+                inviteMenu.hide();
+            }
+            if (mouseEvent.getClickCount() == 2 || mouseEvent.getButton() == MouseButton.SECONDARY){
+                double screenX = tableView.localToScreen(mouseEvent.getX(), 0).getX();
+                double screenY = tableView.localToScreen(0, mouseEvent.getY()).getY();
+                inviteMenu.show(tableView, screenX, screenY);
+            }
+        });
+
+        stage.setScene(scene);
+        stage.show();
+        stage.setOnCloseRequest(windowEvent -> currentFriendId = null);
     }
 
     private void showGroupFunctionMenu(Label label,MouseEvent mouseEvent){
@@ -695,6 +794,38 @@ public class ChatPaneController implements Initializable {
             if (ObjectUtil.isEmpty(currentMemberList)) return;
             currentMemberList.remove(member);
         });
+    }
+
+    private void inviteFriend(){
+        Long gid = getGroupIdByCurrentChatPane();
+        if (ObjectUtil.isEmpty(gid) || ObjectUtil.isEmpty(currentFriendId)) return;
+
+        Group group = PPClientContext.groups.stream()
+                .filter(myGroup -> myGroup.getId().equals(gid))
+                .findFirst().orElse(null);
+        if (ObjectUtil.isEmpty(group)) return;
+
+        assert group != null;
+        GroupMember me = group.getMembers().stream()
+                .filter(member -> member.getId().equals(PPClientContext.uid))
+                .findFirst().orElse(null);
+        if (ObjectUtil.isEmpty(me)) return;
+        assert me != null;
+        if (!me.getLevel().equals(GroupMemberLevel.LEADER.level) && !me.getLevel().equals(GroupMemberLevel.MANAGER.level)){
+            AlertGenerator.showError("权限不足");
+            return;
+        }
+
+        ApplyRequestData data = new ApplyRequestData();
+        data.setToken(PPClientContext.token);
+        data.setUserName(PPClientContext.name);
+        data.setGroupName(group.getName());
+        data.setType(ApplyType.INVITE_GROUP.code);
+        data.setApplicantId(group.getId());
+        data.setUserId(PPClientContext.uid);
+        data.setReceiveId(currentFriendId);
+        PPProtocol<ApplyRequestData> ppProtocol = PPProtocol.of(PPProtocolEnum.APPLY_REQUEST,data);
+        netUtil.sendMessage(ppProtocol);
     }
 
 
