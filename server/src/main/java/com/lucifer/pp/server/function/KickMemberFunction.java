@@ -88,6 +88,10 @@ public class KickMemberFunction implements PPFunction{
                 netUtil.sendMessage(context.getIp(),BaseConstant.CLIENT_PORT,JSONUtil.toJsonStr(ppProtocol));
             }
         });
+        if (redisUtil.isOnline(data.getMemberId())){
+            HeartBeatContext context = redisUtil.getHeartBeatContext(data.getMemberId());
+            netUtil.sendMessage(context.getIp(),BaseConstant.CLIENT_PORT,JSONUtil.toJsonStr(ppProtocol));
+        }
         return null;
     }
 }
