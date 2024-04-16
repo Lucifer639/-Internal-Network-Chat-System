@@ -28,7 +28,6 @@ public class DelGroupMemberFunction implements PPFunction{
     @Override
     public Object apply(Object o) {
         DelGroupMemberData data = ((JSONObject) o).toBean(DelGroupMemberData.class);
-        System.out.println(data);
         Optional<Group> optionalGroup = PPClientContext.groups.stream()
                 .filter(group -> group.getId().equals(data.getGid())).findFirst();
         optionalGroup.ifPresent(group -> {
